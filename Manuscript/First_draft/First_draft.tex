@@ -1,0 +1,207 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[width = 150mm, top = 25mm, bottom = 40mm, bindingoffset = 6mm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{amssymb}
+\usepackage{wrapfig}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{xpatch}
+\usepackage{amsthm}
+\newtheorem{theorem}{Theorem}
+\graphicspath{ {figures/} }
+
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{equation*}}
+\newcommand{\eea}{\end{equation*}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\V}{\mathbb{V}}
+\newcommand{\p}{\partial}
+\newcommand{\im}{\text{i}}
+\newcommand{\infint}{\int_{-\infty}^\infty}
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\sinc}{\textnormal{sinc}}
+
+\numberwithin{equation}{section}
+
+\title{(Working title) A generalised Pad\'e method of approximating the spectra of a class of compact integral operators}
+\author{Can Evren Yarman, Dan Burrows}
+%\date{May 2020}
+\begin{document}
+
+\maketitle
+\section{Method}
+\subsection{Eigenvalue linearisation}
+For fixed $m\in\Z$, consider the $m$th Fourier coefficient of the eigenfunction $\varphi$ and its corresponding eigenvalue $\lambda$. By definition,
+\begin{align*}
+\lambda\hat{\varphi}[m] &= \frac{1}{2}\int_{-1}^1 \lambda\varphi(x)e^{-\im\pi m x}dx
+\\
+&= \frac{1}{2}\int_{-1}^1\int_{-1}^1e^{\im\omega(x - y)^2}\varphi(y)dye^{-\im\pi m x}dx
+\\
+&= \frac{1}{2}\int_{-1}^1\int_{-1}^1e^{\im\omega(x - y)^2}\sum_{n = -\infty}^\infty\hat{\varphi}[n]e^{\im \pi n y}dye^{-\im\pi m x}dx
+\\
+& = \sum_{n = -\infty}^\infty A_{m, n}\hat{\varphi}[n],
+\end{align*}
+where
+\begin{align}
+A_{m, n} &:= \frac{1}{2}\int_{-1}^1\int_{-1}^1e^{\im\omega(x - y)^2}e^{\im \pi n y}e^{-\im\pi m x}dxdy\nonumber
+\\
+&=\frac{1}{2}\infint\infint \chi_{(-1, 1)}(x)\chi_{(-1, 1)}(y)e^{\im\omega(x - y)^2}e^{\im \pi n y}e^{-\im\pi m x}dxdy\label{exact_coefficients}
+\end{align}
+and $\chi_{(a, b)}(\cdot)$, denotes the indicator function over the interval $(a, b)\subset\R$. This leads to the linearised eigenvalue problem 
+\be\label{exact_eigenvalue}
+\bm{A}\hat{\bm{\varphi}} = \lambda\hat{\bm{\varphi}},
+\ee
+where $\bm{A}$ is an infinite-dimensional matrix with entries given by \eqref{exact_coefficients}, and $\hat{\bm{\varphi}}$ is an infinite-dimensional vector consisting of the Fourier coefficients of one of the countably-many eigenfunctions. Hence upon computing the entries \eqref{exact_coefficients}, an eigendecomposition (more detail, diagonalisation?) can be applied to $\bm{A}$, thus providing the eigenvalues of the Fox-Li operator.
+
+In its current form, \eqref{exact_coefficients} is analytically intractable (verify this, can we also use Fourier inverse results for chi and convolution?). To mitigate this, we apply the generalised Pad\'e method as described in [Yarman and Flagg] to form a Gaussian approximation of $\chi_{(-1, 1)}(\cdot)$; denoted here and throughout by $\tilde{\chi}_{(-1, 1)}(\cdot)$. Specifically, we approximate $\chi_{(-1, 1)}(\cdot)$ by constructing
+\be\label{ind_approx}
+\tilde{\chi}_{(-1, 1)}(x) = \sum_{m = 1}^M\alpha_m e^{-\gamma_m x^2} + \epsilon_\chi(x)
+\ee
+for $\alpha_m, \gamma_m\in\mathbb{C}$, $m = 1, 2, \dots, M$ such that Re$\{\gamma_m\} > 0$ for each $m$. With such an approximation obtained, the integrand in \eqref{exact_coefficients} takes on an exponential form and standard Fourier transform results can be applied to obtain the approximate matrix entries
+\be\label{approximate_entries}
+\tilde{A}_{m, n} :=  \frac{1}{2}\int_{-\infty}^\infty\int_{-\infty}^\infty \tilde{\chi}_{(-1, 1)}(x)\tilde{\chi}_{(-1, 1)}(y)e^{\im\omega(x - y)^2}e^{\im \pi n y}e^{-\im\pi m x}dxdy   \approx A_{m, n}.
+\ee
+We temporarily assume the approximation \eqref{ind_approx} is valid and postpone its derivation until Section \ref{Pade_approximation}.
+
+Another way of phrasing the problem is to express the Fox-Li operator $\mathcal{F}_{\omega}$ as
+\begin{align*}
+\mathcal{F}_\omega f(x) &= \infint e^{\im\omega(x - y)^2}\left\{ \sum_{m = 1}^M\alpha_m e^{-\gamma_m y^2} + \epsilon_\chi(y) \right\} f(y)dy
+\\
+&= \tilde{\F}_\infty f(x) + \F_\epsilon f(x).
+\end{align*}
+(Maybe try $|\F_\omega  - \tilde{\F}_\infty|$ here for error analysis?). Since $\max_{\{-1, 1\}}|\epsilon_\chi(y)| \le 0.1$ (needs verifying), it follows that $|\F_\epsilon f| \le 0.1\|f\|_{L^1}$. It seems here at first glance that $f$ with large $L^1$ norm provide worse error bounds, but maybe something can be said about $L^2$ here as well.
+
+\subsection{Generalised Pad\'e approximation}\label{Pade_approximation}
+The generalised Pad\'e method approximates a function $f$, analytic in a neighbourhood of $0$, as the sum of $M$ scaled versions of the function $g$, also analytic within a neighbourhood of $0$. In particular, given the analytic function
+\[
+f(x) := \sum_{n = 0}^\infty f_nx^n, \quad f_n = f^{(n)}(0) / n!
+\]
+there are algorithms available that, given  $\epsilon > 0$, find $\{(\alpha_m, \gamma_m)\}_{m = 1}^M$ such that
+\[
+|f^{(n)}(0) - G_{M(\epsilon)}^{(n)}(0)| \le \epsilon, \quad \epsilon > 0, 
+\]
+for $n = 0, 1, \dots, 2N$, $M \le N$, where
+\[
+G_{M(\epsilon)}(x) := \sum_{m = 1}^M\alpha_mg(\gamma_m x),
+\]
+and
+\[
+g(x) := \sum_{n = 0}^\infty g_nx^n, \quad g_n = g^{(n)}(0) / n!
+\]
+within some neighbourhood of $0$.
+
+The Kung algorithm is one such way of obtaining $\{(\alpha_m, \gamma_m)\}_{m = 1}^M$. The method depends heavily on the Hankel matrix constructed from the ratio $h_n:=f_n/g_n$.  The $\{(\alpha_m, \gamma_m)\}_{m = 1}^M$ are then obtained after some matrix algebra operations on the Hankel matrix.
+
+\subsection{Gaussian approximation of indicator function}
+We utiliise the generalised Pad\'e approximation method to form a Gaussian approximation to the indicator function. We do this by first using Kung's algorithm to approximate the almost-everywhere analytic cardinal $\sin$ function by a sum of Gaussians. By linearity of the Fourier transform and the invariance of a Gaussian under the action of the Fourier transform, it follows that the resulting Fourier transform will approximate the true Fourier transform of cardinal $\sin$, which is the indicator function. Hence we achieve the desired Gaussian approximation.
+
+%\textbf{Insert workings for approximate matrix entries here}
+
+For $f\in L^2(\R)$ (think about this space), define the Fourier transform as
+\[
+(Ff)(\xi) = \hat{f}(\xi) := \infint f(x)e^{\im\xi x}dx, \quad \xi\in\R.
+\]
+Then it is true that for any $B > 0$,
+\[
+F[\sinc(B\cdot)](\xi) = \frac{\pi}{B}\chi_{(-B, B)}(\xi), \quad\xi\in\R.
+\]
+The workings for the approximate matrix entries $\tilde{A}_{m, n}$ are in the appendix of the thesis. On initial check, the result
+\be
+\tilde{A}_{m, n} =\pi\sum_{k=1}^M\sum_{l=1}^M\frac{\alpha_{k}\alpha_{l}}{\sqrt{\left(\mathrm{i}\omega-\gamma_{l}\right)\left(\mathrm{i}\omega-\gamma_{k}\right)+\omega^{2}}}\exp\left[\frac{\left(\pi n\right)^{2}}{4\left(\mathrm{i}\omega-\gamma_{l}\right)}\right]\exp\left[-\frac{\left(\frac{\pi n\omega}{\mathrm{i}\omega-\gamma_{l}}+\mathrm{i}\pi m\right)^{2}}{4\left(\mathrm{i}\omega-\gamma_{k}+\frac{\omega^{2}}{\mathrm{i}\omega-\gamma_{l}}\right)}\right]\label{Approx_As}
+\ee
+looks correct, but there may be a mistake in the subsequent error analysis.
+
+\subsection{Explicit derivation of $\tilde{A}_{m, n}$}
+We run the Pad\'e method to find $\{\tilde{\alpha}_m, \tilde{\gamma}_m\}$ that achieves the $\sinc$ by Gaussian approximation. Then define
+\[
+\tilde{\chi}_{(-1, 1)}(x) = \sum_m\alpha_me^{-\gamma_mx^2},
+\]
+where
+\[
+\alpha_m := \frac{\tilde{\alpha_m}}{\sqrt{\pi\tilde{\gamma}_m}}, \quad \gamma_m := \frac{1}{4\tilde{\gamma}_m^2}.
+\]
+By \eqref{Approx_As} it then follows that
+\begin{align*}
+2\tilde{A}_{m, n} &= \sum_k\sum_l\alpha_k\alpha_l\int\int e^{-\gamma_kx^2}e^{-\gamma_ly^2}e^{\im\pi n y}e^{\im\omega(x - y)^2}e^{-\im\pi mx}dydx
+\\
+&=\sum_k\sum_l\alpha_k\alpha_l\int f_1(x)\int e^{a_ly^2}e^{\im(\pi n - 2\omega x)y}dydx,	
+\end{align*}
+where $a_l := -\gamma_l + \im\omega$, Re$\{a_l\} < 0$. Then
+\begin{align*}
+	2\tilde{A}_{m, n} &=\sum_k\sum_l\alpha_k\alpha_l\sqrt{\frac{\pi}{-a_l}}\int f_1(x) e^{\frac{(\pi n - 2\omega x)^2}{4a_l}}dx
+	\\
+	&=\sum_k\sum_l\alpha_k\alpha_l\sqrt{\frac{\pi}{-a_l}}e^{\frac{\pi^2n^2}{4a_l}}\int e^{\left( a_k +\frac{\omega^2}{a_l}\right)x^2}e^{\left( \frac{\pi n\omega}{a_l} - \im \pi m \right)x}dx
+	\\
+	&=\sum_k\sum_l\alpha_k\alpha_l\sqrt{\frac{\pi}{-a_l}}\sqrt{\frac{\pi}{-(a_k + \omega^2/a_l)}}e^{\frac{\pi^2n^2}{4a_l}} e^{-\frac{\left(\frac{\pi n\omega}{a_l} - \im\pi m\right)^2}{4\left(a_k + \frac{\omega^2}{a_l}\right)}}
+	\\
+	\Rightarrow \tilde{A}_{m, n} &= \frac{\pi}{2}\sum_k\sum_l\alpha_k\alpha_l\frac{1}{\sqrt{a_ka_l + \omega^2}}e^{\frac{\pi^2n^2(a_ka_l + \omega^2) - (\pi n\omega - \im\pi ma_l)^2}{4a_l(a_ka_l + \omega^2)}}.
+\end{align*}
+
+
+\section{Error analysis}
+We need to observe how the Pad\'e error and Fourier errors are propagated through the method. This can be determined by
+\begin{align*}
+|\F_\omega f(x) - \tilde{\F}_\omega f(x)| &= \left|\infint\infint\left\{\chi_{(-1, 1)}(y)\chi_{(-1, 1)}(y) - \tilde{\chi}_{(-1, 1)}(y)\tilde{\chi}_{(-1, 1)}(y)\right\}e^{\im\omega(x - y)^2}f(y)dy\right|
+\end{align*}
+or, perhaps more precisely, start with the eigenvalue error.
+
+We also need to do some analysis on the decay of the matrix entries \eqref{Approx_As} as these are key to error Fourier error.
+
+Tweak the parameters of the method computationally and understand the results. Compare with asymptotic results from Iserles et al.
+
+Another task --- suggested in Evren's project supervision notes --- is that "we would like to see if we can interpolate the trajectory of the eigenvalues by
+\[
+\overline{\lambda}_n = \sum_m\alpha_m\gamma_m^n.
+\]
+which can be tackled solving the appropriate moment problem".
+
+Comment on the computational cost of the Kung algorithm. Is this that relevant? Other algorithms other than Kung are available for realisation problems, and these may be more efficient. Maybe these also need exploring.
+
+
+\section{Extension to compact integral operators}
+Think of an appropriate extension and insert here. Domain obviously has to be compact. Future work could include for general compact $\Omega\subset\mathbb{R}^d$? When it comes to actual write up, need to decide whether to open with the general case and later specify Fox-Li, or the other way round.
+\[
+\int_{-1}^1 f(y)e^{\im \omega g(x, y)}dy.
+\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

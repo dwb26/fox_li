@@ -1,0 +1,26 @@
+For a function $f \in L^2(-1, 1)$, the Fox-Li operator is defined as
+\be \label{Fox-Li}
+(\F_\omega f) (x) := \int_{-1}^1f(y)e^{\im\omega(x - y)^2}dy, \quad x\in(-1, 1), \ \omega\gg1.
+\ee
+The pair $(\lambda, \varphi)\in\mathbb{C}\times L^2(-1, 1)$ is called an eigenpair of \eqref{Fox-Li} if $\F_\omega \varphi = \lambda\varphi$, i.e. if
+\be\label{eigenvalue_eq}
+	\lambda\varphi(x) = \lambda\int_{-1}^1 \varphi(y)e^{\im\omega(x - y)^2}dy
+\ee
+holds at almost every $x$, in which case $\lambda$ and $\varphi$ are called an eigenvalue and eigenfunction of \eqref{Fox-Li} respectively.
+
+Being compact, standard spectral theory tells us that the spectrum $\sigma(\F_\omega)$ of \eqref{Fox-Li} contains at most countably many eigenvalues that, in the case of infinite cardinality, accumulate only at the origin. Existence of at least one eigenvalue was proved by [Cochran1964] which --- with the possible exception of a countable number of $\omega$ --- was extended to the existence of infinitely many by [Hochstadt1966] shortly after.
+
+Thus for all but countably many $\omega$, $\sigma(\F_\omega)$ is an infinitely countable set of complex numbers that accumulate at the origin. To date, any further analytical properties of the structure of this sequence have yet to be obtained, and the problem of determining $\sigma(\F_\omega)$ has provided fertile ground for the development of numerical spectral methods, while remaining of practical interest in its own right.
+
+The challenge of applying conventional numerical methods to \eqref{eigenvalue_eq} stems from the presence of the oscillatory parameter $\omega$, which is generally large in any practical application of interest. The finite section method applied in [Brunner2009] leads to an infinite-dimensional matrix-eigenvalue problem for which the matrix entries involve integral evaluations of an $L^2(-1, 1)$-orthonormal basis, and the entries of the eigenvector are the coefficients of the basis expansion of the corresponding eigenfunction. In each of the two basis choices, $\omega$ competes with the decay of the matrix values that is required to obtain an accurate approximation to the true infinite matrix, with this delay worsening as $\omega$ increases.
+
+In this paper we apply an alternative method that exploits the compactness of \eqref{Fox-Li} and the exponential form of the kernel $K_\omega(x, y) = e^{\im\omega(x - y)^2}$ by approximating the indicator function $\chi_{(-1, 1)}(x)$ by a sum of Gaussians. Such an approximation is constructed by solving a relaxed realisation problem using the method outlined in [YarmanFlagg2015]. Similarly to [Brunner2009], this gives rise to an infinite matrix-eigenvalue problem, but for which the matrix entries $\tilde{A}_{m, n}$ are now integrals of $L^1(\R)$-bounded exponential functions over $\R$ and the unknown eigenvector consists of the Fourier coefficients of the corresponding eigenfunction. The utility of this construction is that Fourier transform results can be applied to obtain a closed form expression for each $\tilde{A}_{m, n}$. Approximations to the eigenvalues of \eqref{Fox-Li} are then given by the eigenvalues of $\tilde{A}$, which may be obtained by truncating $\tilde{A}$ and performing an eigendecomposition. The rate of decay of these entries --- and their necessary dominance over $\omega$ ---  is again a central factor in determining the accuracy of the spectral approximations.
+
+
+
+
+
+
+
+
+\textbf{Also need to mention: Convolution, Fredholm (Fourier formula), analytical spectral work, practical derivation (modes)}
